@@ -1,0 +1,9 @@
+---
+- name: Source virtualenvwrapper script.
+  command: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+
+- name: Source virtualenvwrapper script automatically via bashrc.
+  lineinfile:
+    dest: /home/vagrant/.bashrc
+    line: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+    state: present

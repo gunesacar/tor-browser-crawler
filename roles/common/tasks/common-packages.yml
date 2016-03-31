@@ -1,0 +1,8 @@
+---
+- name: Install common packages.
+  become: yes
+  apt:
+    name: {{ item }}
+    state: latest
+    force: yes
+  with_items: "{{ common_apt_packages }}"

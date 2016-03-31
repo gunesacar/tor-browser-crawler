@@ -1,0 +1,13 @@
+---
+common_apt_packages:
+  - virtualenvwrapper
+  - tmux
+  - tree
+  - vim
+  - git #tbselenium depends
+  - python-dev # psutil depends
+  - libpcap-dev # pcapy depends
+  - gnupg-curl
+tbb_arch: 64
+tbb_release: 5.5.4
+tbb_locale: en-US

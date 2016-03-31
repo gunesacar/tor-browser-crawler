@@ -1,0 +1,31 @@
+---
+- name: Create the directory tor-browser-crawler wants you to put Tor Browser Bundle (TBB) in.
+  file:
+    path: /home/vagrant/.tbb/
+    state: directory
+    mode: 0755
+
+- name: Download TBB tarball and signature.
+  get_url:
+    url: "{{ item }}"
+    dest: /home/vagrant/.tbb/
+  with_items:
+    - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+    - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc
+
+- name: Download TBB signing key.
+  command: gpg --keyserver hkps://keyserver.cns.vt.edu --verify /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+  register: gpg_import_tor_browser_devs_key_result
+  changed_when: "'imported 1' in gpg_import_tor_browser_devs_key_result.stderr" 
+
+- name: Verify TBB signature.
+  command: gpg --verify /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+  register: gpg_verify_result
+  changed_when: false
+
+- name: Extract TBB.
+command: tar -xf tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+  args:
+    chdir: /home/vagrant/.tbb/
+
+- name: Move TBB to the directory tor-browser-crawler wants used by default.

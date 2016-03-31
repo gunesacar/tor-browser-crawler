@@ -1,0 +1,8 @@
+---
+- name: Uninstall ntpdate if it's present.
+  become: yes
+  apt:
+    name: ntpdate
+    state: absent
+    purge: yes
+    force: yes
