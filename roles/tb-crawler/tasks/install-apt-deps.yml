@@ -2,7 +2,7 @@
 - name: Install python2.7, tcpdump, wireshark, and xvfb.
   become: yes
   apt:
-    name: 
+    name: "{{ item }}"
     state: latest
     force: yes
-  with-items: "{{ tb_crawler_apt_packages }}"
+  with_items: "{{ tb_crawler_apt_packages }}"
