@@ -1,4 +1,9 @@
 ---
+- name: Remove directory tor-browser-crawler wants this version of TBB extracted to.
+  file:
+    path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
+    state: absent
+
 - name: Create the directory tor-browser-crawler wants this version of TBB extracted to.
   file:
     path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
