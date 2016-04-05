@@ -6,3 +6,8 @@ results/
 .pydevproject
 __pycache__
 *.un~
+.vagrant/
+playbook.retry
+*.swp
+
+
