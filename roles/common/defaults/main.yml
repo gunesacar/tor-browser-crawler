@@ -8,6 +8,7 @@ common_apt_packages:
   - python-dev # psutil depends
   - libpcap-dev # pcapy depends
   - gnupg-curl
+  - tor # potentially separate out 
 tbb_arch: 64
 tbb_release: 5.5.4
 tbb_locale: en-US
