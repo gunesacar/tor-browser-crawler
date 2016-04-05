@@ -1,6 +1,11 @@
 ---
 - name: Create tb-crawler virtual environment, install tb-crawler python packages, enter tb-crawler dir, and enter tb-crawler virtual environment.
-  command: mkvirtualenv -a /home/vagrant/tor-browser-crawler/ -r /home/vagrant/tor-browser-crawler/requirements.txt -p /usr/bin/python2.7 tb-crawler
+  command: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && mkvirtualenv -a /home/vagrant/tor-browser-crawler/ -r /home/vagrant/tor-browser-crawler/requirements.txt -p /usr/bin/python2.7 tb-crawler
+  args:
+    executable: /bin/bash
+
 
 - name: Deactivate virtual environment.
-  command: deactivate
+  command: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && deactivate
+  args:
+    executable: /bin/bash
