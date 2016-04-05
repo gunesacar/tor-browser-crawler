@@ -1,7 +1,7 @@
 ---
-- name: Create the directory tor-browser-crawler wants you to put Tor Browser Bundle (TBB) in.
+- name: Create the directory tor-browser-crawler wants this version of TBB extracted to.
   file:
-    path: /home/vagrant/.tbb/
+    path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
     state: directory
     mode: 0755
 
@@ -14,18 +14,24 @@
     - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc
 
 - name: Download TBB signing key.
-  command: gpg --keyserver hkps://keyserver.cns.vt.edu --verify /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+  command: gpg --keyserver hkps://keyserver.cns.vt.edu --recv-key EF6E286DDA85EA2A4BA7DE684E2C6E8793298290
   register: gpg_import_tor_browser_devs_key_result
-  changed_when: "'imported 1' in gpg_import_tor_browser_devs_key_result.stderr" 
+  changed_when: "'imported: 1' in gpg_import_tor_browser_devs_key_result.stderr"
 
 - name: Verify TBB signature.
-  command: gpg --verify /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+  command: gpg --verify tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
   register: gpg_verify_result
   changed_when: false
-
-- name: Extract TBB.
-command: tar -xf tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
   args:
     chdir: /home/vagrant/.tbb/
 
-- name: Move TBB to the directory tor-browser-crawler wants used by default.
+# The unarchive module is relying on tar's --diff option, which does not check
+# file hashes, just that the same filenames are present. Thus you can change a
+# file inside the unarchived folder, while preserving it's name, and tar --diff
+# will consider it unchanged. tar's --skip-old-files behaves in the same way.
+# When we re-run our playbook it's necessary we ensure the same end-state and
+# overwrite a potentially polluted browser profile.
+- name: Extract TBB archive to the dir required by tor-browser-crawler for this TBB version.
+  command: tar --extract --xz --file tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz --directory tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }} --strip-components 1
+  args:
+    chdir: /home/vagrant/.tbb/
