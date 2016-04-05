@@ -5,4 +5,7 @@
     name: "{{ item }}"
     state: latest
     force: yes
+    # Since this role is separate from common, it makes sense to update the pkg
+    # cache before installing these pkgs
+    update_cache: yes
   with_items: "{{ tb_crawler_apt_packages }}"
