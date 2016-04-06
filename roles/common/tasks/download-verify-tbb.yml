@@ -1,15 +1,4 @@
 ---
-- name: Remove directory tor-browser-crawler wants this version of TBB extracted to.
-  file:
-    path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
-    state: absent
-
-- name: Create the directory tor-browser-crawler wants this version of TBB extracted to.
-  file:
-    path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
-    state: directory
-    mode: 0755
-
 - name: Download TBB tarball and signature.
   get_url:
     url: "{{ item }}"
@@ -17,7 +6,6 @@
   with_items:
     - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
     - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc
-
 - name: Download TBB signing key.
   command: gpg --keyserver hkps://keyserver.cns.vt.edu --recv-key EF6E286DDA85EA2A4BA7DE684E2C6E8793298290
   register: gpg_import_tor_browser_devs_key_result
@@ -35,8 +23,30 @@
 # file inside the unarchived folder, while preserving it's name, and tar --diff
 # will consider it unchanged. tar's --skip-old-files behaves in the same way.
 # When we re-run our playbook it's necessary we ensure the same end-state and
-# overwrite a potentially polluted browser profile.
-- name: Extract TBB archive to the dir required by tor-browser-crawler for this TBB version.
-  command: tar --extract --xz --file tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz --directory tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }} --strip-components 1
-  args:
-    chdir: /home/vagrant/.tbb/
+# overwrite a potentially polluted browser profile. Hence the following:
+
+- name: Remove the dir the TBB tarball will be extracted to.
+  file:
+    path: /home/vagrant/.tbb/tor-browser_en-US/
+    state: absent
+
+- name: Extract TBB archive.
+  unarchive:
+    src: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
+    dest: /home/vagrant/.tbb/
+
+- name: Remove directory tor-browser-crawler wants this version of TBB extracted to.
+  file:
+    path: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
+    state: absent
+
+- name: Copy the extracted TBB tarball to the directory tor-browser-crawler wants for this version.
+  copy:
+    src: /home/vagrant/.tbb/tor-browser_en-US
+    dest: /home/vagrant/.tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
+    remote_src: True
+
+- name: Remove the dir the TBB tarball was be extracted to.
+  file:
+    path: /home/vagrant/.tbb/tor-browser_en-US/
+    state: absent
