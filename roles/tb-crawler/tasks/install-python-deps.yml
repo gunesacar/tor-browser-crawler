@@ -1,15 +1,11 @@
 ---
 - name: Check if tb-crawler virtual environment exists.
   stat:
-    path: /home/vagrant/.virtualenvs/tb-crawler
+    path: /home/vagrant/.virtualenvs/tb-crawler/
   register: tb_crawler_virtualenv
 
-- name: Create tb-crawler virtual environment and install tor-browser-crawler python requirements to it.
-  command: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && mkvirtualenv -a /home/vagrant/tor-browser-crawler/ -r /home/vagrant/tor-browser-crawler/requirements.txt -p /usr/bin/python2.7 tb-crawler
-  args:
-    executable: /bin/bash
-  when: not (tb_crawler_virtualenv.stat.isdir is defined and tb_crawler_virtualenv.stat.isdir)
-
-- name: Update tb-crawler virtual environment packages.
-command: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh && workon tb-crawler && pip install -r /home/vagrant/tor-browser-crawler/requirements.txt
-  when: tb_crawler_virtualenv.stat.isdir is defined and tb_crawler_virtualenv.stat.isdir
+- name: Install tor-browser-crawler pip dependencies to tb-crawler virtualenv.
+  pip:
+    requirements: /home/vagrant/tor-browser-crawler/requirements.txt
+    virtualenv: /home/vagrant/.virtualenvs/tb-crawler/
+    virtualenv_python: python2.7
