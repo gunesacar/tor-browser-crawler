@@ -2,6 +2,7 @@
 - name: Check user capture abilities.
   command: setcap -v 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
   register: capture_abilites_results
+  failed_when: false
 
 - name: Set user capture abilities.
   become: yes
