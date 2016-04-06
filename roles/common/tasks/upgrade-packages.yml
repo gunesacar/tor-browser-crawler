@@ -1,7 +1,14 @@
 ---
+- name: Install aptitude (needed by ansible).
+  become: yes
+  apt:
+    name: aptitude
+    state: present
+    update-cache: yes
+    force: yes
+
 - name: Upgrade all packages.
   become: yes
   apt:
-    update_cache: yes
     upgrade: safe
     force: yes
