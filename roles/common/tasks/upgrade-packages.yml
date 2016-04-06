@@ -5,10 +5,8 @@
     name: aptitude
     state: present
     update-cache: yes
-    force: yes
 
 - name: Upgrade all packages.
   become: yes
   apt:
     upgrade: safe
-    force: yes

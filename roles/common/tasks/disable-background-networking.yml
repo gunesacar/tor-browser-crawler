@@ -5,4 +5,3 @@
     name: ntpdate
     state: absent
     purge: yes
-    force: yes

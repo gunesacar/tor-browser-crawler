@@ -4,7 +4,6 @@
   apt:
     name: "{{ item }}"
     state: latest
-    force: yes
       # No need to update package cache because we do this in
       # update-packages.yml
     update_cache: no
