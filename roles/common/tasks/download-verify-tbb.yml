@@ -1,4 +1,10 @@
 ---
+- name: Create ~/.tbb folder
+  file:
+    path: /home/vagrant/.tbb/
+    state: directory
+    owner: 0755
+
 - name: Download TBB tarball and signature.
   get_url:
     url: "{{ item }}"
