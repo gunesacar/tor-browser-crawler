@@ -27,6 +27,7 @@ Docker requires running it in privileged mode:
 
 * SSH into the container: `vagrant ssh`
 
-* Once authenticated in you will probably want to use virtualenvwrapper's
-`workon tb-crawler` to enter the 'tb-crawler' environment, which already has all
-the pip dependencies for tor-browser-crawler installed.
+* Once authenticated, maybe you'll want to start tmux (if you're into that sort
+of thing), and you'll definitely want to run `workon tb-crawler` to activate
+the 'tb-crawler' environment (courtesy of virtualenvwrapper), which already
+has all the pip dependencies for tor-browser-crawler installed.
