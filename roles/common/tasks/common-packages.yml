@@ -1,0 +1,10 @@
+---
+- name: Install common packages.
+  become: yes
+  apt:
+    name: "{{ item }}"
+    state: latest
+      # No need to update package cache because we do this in
+      # update-packages.yml
+    update_cache: no
+  with_items: "{{ common_apt_packages }}"

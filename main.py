@@ -16,7 +16,7 @@ def main():
     args = parse_arguments()
 
     # Read URLs
-    url_list = read_list_urls(args)
+    url_list = parse_url_list(args.url_list)
 
     # Get torrc matching experiment type
     torrc_dict = cm.TORRC_BY_TYPE[args.experiment]
@@ -40,28 +40,21 @@ def main():
         crawler.stop_crawl()
 
 
-def read_list_urls(file_path):
+def parse_url_list(url_list):
     """Return list of urls from a file."""
-    assert (isfile(file_path.url_list_path))  # check that file exists
-    assert (not stat(file_path.url_list_path).st_size == 0)  # check that file is not empty
-    url_list = []
-    try:
-        with open(file_path.url_list_path) as f:
-            file_contents = f.read()
-            url_list = file_contents.splitlines()
-            url_list = url_list[file_path.start_line - 1:file_path.stop_line]
-    except Exception as e:
-        ut.die("ERROR: while parsing URL list: {} \n{}".format(e, traceback.format_exc()))
-    return url_list
-
+    with url_list:
+        url_acc = [line.strip() for line in url_list]
+    return url_acc
 
 def parse_arguments():
     # Parse arguments
     parser = argparse.ArgumentParser(description='Crawl a list of URLs in multiple batches.')
 
     # List of urls to be crawled
-    parser.add_argument('-u', '--url-list', required=True,
-                        help='Path to the fail that contains the list of URLs to crawl.')
+    parser.add_argument('-u', '--url-list',
+                        type=argparse.FileType('r'), required=True,
+                        help='Path to the file that contains the list of URLs \
+                        to crawl.')
     parser.add_argument('-o', '--output',
                         help='Directory to dump the results (default=./results).',
                         default=cm.RESULTS_DIR)

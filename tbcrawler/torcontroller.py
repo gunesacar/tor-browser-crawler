@@ -15,7 +15,7 @@ class TorController(object):
                  tbb_path=None,
                  tor_binary_path=None,
                  tor_data_path=None,
-                 torrc_dict={'SocksPort': str(cm.DEFAULT_SOCKS_PORT)},
+                 torrc_dict={'SocksPort': str(cm.TORRC_DEFAULT['SocksPort'])},
                  tor_log='/dev/null'):
         assert (tbb_path or tor_binary_path and tor_data_path)
         if tbb_path:

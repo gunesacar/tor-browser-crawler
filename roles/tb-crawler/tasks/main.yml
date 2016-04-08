@@ -1,0 +1,4 @@
+---
+- include: install-apt-deps.yml
+- include: install-python-deps.yml
+- include: set-user-capture-abilities.yml

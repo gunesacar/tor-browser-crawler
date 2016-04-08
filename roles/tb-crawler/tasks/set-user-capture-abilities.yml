@@ -1,0 +1,14 @@
+---
+- name: Set user capture abilities.
+  become: yes
+  capabilities:
+    path: /usr/bin/dumpcap
+    capability: cap_net_raw+eip
+    state: present
+    
+- name: Set user capture abilities.
+  become: yes
+  capabilities:
+    path: /usr/bin/dumpcap
+    capability: cap_net_admin+eip
+    state: present
