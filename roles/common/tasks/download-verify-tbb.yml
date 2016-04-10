@@ -1,17 +1,18 @@
 ---
 - name: Create ~/.tbb folder
   file:
-    path: /home/vagrant/tor-browser-crawler/tbb/
+    path: "~{{ tbb_username }}/tor-browser-crawler/tbb/"
     state: directory
     mode: 0755
 
 - name: Download TBB tarball and signature.
   get_url:
     url: "{{ item }}"
-    dest: /home/vagrant/tor-browser-crawler/tbb/
+    dest: "~{{ tbb_username }}/tor-browser-crawler/tbb/"
   with_items:
     - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
     - https://dist.torproject.org/torbrowser/{{ tbb_release }}/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz.asc
+
 - name: Download TBB signing key.
   command: gpg --keyserver hkps://keyserver.cns.vt.edu --recv-key EF6E286DDA85EA2A4BA7DE684E2C6E8793298290
   register: gpg_import_tor_browser_devs_key_result
@@ -22,7 +23,7 @@
   register: gpg_verify_result
   changed_when: false
   args:
-    chdir: /home/vagrant/tor-browser-crawler/tbb/
+    chdir: "~{{ tbb_username }}/tor-browser-crawler/tbb/"
 
 # The unarchive module is relying on tar's --diff option, which does not check
 # file hashes, just that the same filenames are present. Thus you can change a
@@ -33,21 +34,21 @@
 
 - name: Remove the dir the TBB tarball will be extracted to.
   file:
-    path: /home/vagrant/tor-browser-crawler/tbb/tor-browser_en-US/
+    path: "~{{ tbb_username }}/tor-browser-crawler/tbb/tor-browser_en-US/"
     state: absent
 
 - name: Extract TBB archive.
   unarchive:
     copy: no
-    src: /home/vagrant/tor-browser-crawler/tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz
-    dest: /home/vagrant/tor-browser-crawler/tbb/
+    src: "~{{ tbb_username }}/tor-browser-crawler/tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}.tar.xz"
+    dest: "~{{ tbb_username }}/tor-browser-crawler/tbb/"
 
 - name: Remove directory tor-browser-crawler wants this version of TBB extracted to.
   file:
-    path: /home/vagrant/tor-browser-crawler/tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/
+    path: "~{{ tbb_username }}/tor-browser-crawler/tbb/tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}/"
     state: absent
 
 - name: Move the extracted TBB tarball to the directory tor-browser-crawler wants for this version.
   command: mv tor-browser_en-US/ tor-browser-linux{{ tbb_arch }}-{{ tbb_release }}_{{ tbb_locale }}
   args:
-    chdir: /home/vagrant/tor-browser-crawler/tbb/
+    chdir: "~{{ tbb_username }}/tor-browser-crawler/tbb/"

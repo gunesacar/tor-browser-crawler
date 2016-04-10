@@ -12,3 +12,5 @@ common_apt_packages:
 tbb_arch: 64
 tbb_release: 5.5.4
 tbb_locale: en-US
+
+tbb_username: "{{ ansible_ssh_user }}"
