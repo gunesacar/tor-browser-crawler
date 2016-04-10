@@ -1,0 +1,7 @@
+---
+- name: Start the Tor daemon.
+  become: yes
+  service:
+    name: tor
+    state: started
+    enabled: yes

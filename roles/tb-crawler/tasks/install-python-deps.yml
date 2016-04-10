@@ -1,0 +1,11 @@
+---
+- name: Check if tb-crawler virtual environment exists.
+  stat:
+    path: "~{{ tbb_username }}/.virtualenvs/tb-crawler/"
+  register: tb_crawler_virtualenv
+
+- name: Install tor-browser-crawler pip dependencies to tb-crawler virtualenv.
+  pip:
+    requirements: "~{{ tbb_username }}/tor-browser-crawler/requirements.txt"
+    virtualenv: "~{{ tbb_username }}/.virtualenvs/tb-crawler"
+    virtualenv_python: python2.7

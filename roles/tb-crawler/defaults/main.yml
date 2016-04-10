@@ -1,0 +1,7 @@
+---
+tb_crawler_apt_packages:
+  - tcpdump
+  - wireshark
+  - xvfb
+
+tbb_username: "{{ ansible_ssh_user }}"

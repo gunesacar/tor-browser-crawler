@@ -1,0 +1,6 @@
+---
+- name: Source virtualenvwrapper script via bashrc.
+  lineinfile:
+    dest: "~{{ tbb_username }}/.bashrc"
+    line: source /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+    state: present
