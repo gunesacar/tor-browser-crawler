@@ -60,8 +60,8 @@ class CrawlerBase(object):
                         self.driver.get_screenshot_as_file(self.job.png_file)
                     except WebDriverException:
                         wl_log.error("Cannot get screenshot.")
+                self.post_visit()
             sleep(float(self.job.config['pause_between_visits']))
-            self.post_visit()
 
     def __do_visit(self):
         with Sniffer(path=self.job.pcap_file, filter=cm.DEFAULT_FILTER):
