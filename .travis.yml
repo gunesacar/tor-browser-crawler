@@ -34,7 +34,6 @@ install:
   - pip install pytest-cov
   - pip install -r requirements.txt
   - sudo apt-get -qq install tor
-  - easy_install .
   - tarball=`echo $VERSION_ARCH | cut -d'/' -f 2`
   - wget https://archive.torproject.org/tor-package-archive/torbrowser/$VERSION_ARCH
   - tar -xf $tarball -C $HOME
