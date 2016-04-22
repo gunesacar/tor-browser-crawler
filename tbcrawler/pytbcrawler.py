@@ -22,11 +22,11 @@ from torcontroller import TorController
 
 
 def run():
-    # build dirs
-    build_crawl_dirs()
-
     # Parse arguments
     args, config = parse_arguments()
+
+    # build dirs
+    build_crawl_dirs()
 
     # Read URLs
     url_list = read_list_urls(args.url_file, args.start, args.stop)
@@ -158,9 +158,9 @@ def parse_arguments():
     parser.add_argument('-s', '--screenshots', action='store_true',
                         help='Capture page screenshots',
                         default=False)
-    parser.add_argument('-d', '--device', action='store_true',
+    parser.add_argument('-d', '--device',
                         help='Interface to sniff the network traffic',
-                        default="eth0")
+                        default='eth0')
 
     # Limit crawl
     parser.add_argument('--start', type=int,
