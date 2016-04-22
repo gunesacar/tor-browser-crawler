@@ -1,4 +1,5 @@
-from os.path import join
+from os import rename
+from os.path import join, split
 from pprint import pformat
 from time import sleep
 
@@ -11,10 +12,11 @@ from log import wl_log
 
 
 class CrawlerBase(object):
-    def __init__(self, driver, controller, screenshots=True):
+    def __init__(self, driver, controller, device='eth0', screenshots=True):
         self.driver = driver
         self.controller = controller
         self.screenshots = screenshots
+        self.device = device
 
         self.job = None
 
@@ -42,42 +44,65 @@ class CrawlerBase(object):
                 if len(self.job.url) > cm.MAX_FNAME_LENGTH:
                     wl_log.warning("URL is too long: %s" % self.job.url)
                     continue
+
                 self.__do_instance()
                 sleep(float(self.job.config['pause_between_sites']))
 
     def __do_instance(self):
         for self.job.visit in xrange(self.job.visits):
             ut.create_dir(self.job.path)
-            wl_log.info("*** Visit #%s to %s ***", self.job.visit, self.job.url)
+            wl_log.info("*** Visit #%s to %s ***",
+                        self.job.visit, self.job.url)
             with self.driver.launch():
-                try:
-                    self.driver.set_page_load_timeout(cm.SOFT_VISIT_TIMEOUT)
-                except WebDriverException as seto_exc:
-                    wl_log.error("Setting soft timeout %s", seto_exc)
+                self.set_page_load_timeout()
+
                 self.__do_visit()
-                if self.screenshots:
-                    try:
-                        self.driver.get_screenshot_as_file(self.job.png_file)
-                    except WebDriverException:
-                        wl_log.error("Cannot get screenshot.")
-            sleep(float(self.job.config['pause_between_visits']))
-            self.post_visit()
+
+                self.get_screenshot_if_enabled()
+                self.post_visit()
 
     def __do_visit(self):
-        with Sniffer(path=self.job.pcap_file, filter=cm.DEFAULT_FILTER):
+        with Sniffer(device=self.device,
+                     path=self.job.pcap_file, filter=cm.DEFAULT_FILTER):
             sleep(1)  # make sure dumpcap is running
             try:
                 with ut.timeout(cm.HARD_VISIT_TIMEOUT):
                     self.driver.get(self.job.url)
+
+                    page_source = self.driver.page_source.strip().lower()
+                    if ut.has_captcha(page_source):
+                        wl_log.warning('captcha found')
+                        self.job.add_captcha()
+
                     sleep(float(self.job.config['pause_in_site']))
-            except (ut.HardTimeoutException, TimeoutException):
+            except (cm.HardTimeoutException, TimeoutException):
                 wl_log.error("Visit to %s has timed out!", self.job.url)
+            except ValueError as e:
+                raise e
             except Exception as exc:
                 wl_log.error("Unknown exception: %s", exc)
+
+    def set_page_load_timeout(self):
+        try:
+            self.driver.set_page_load_timeout(
+                cm.SOFT_VISIT_TIMEOUT)
+        except WebDriverException as seto_exc:
+            wl_log.error("Setting soft timeout %s", seto_exc)
+
+    def get_screenshot_if_enabled(self):
+        if self.screenshots:
+            try:
+                self.driver.get_screenshot_as_file(self.job.png_file)
+            except WebDriverException:
+                wl_log.error("Cannot get screenshot.")
 
 
 class CrawlerWebFP(CrawlerBase):
     def post_visit(self):
+        sleep(float(self.job.config['pause_between_visits']))
+        self.filter_packets_without_guard_ip()
+
+    def filter_packets_without_guard_ip(self):
         guard_ips = set([ip for ip in self.controller.get_all_guard_ips()])
         wl_log.debug("Found %s guards in the consensus.", len(guard_ips))
         wl_log.info("Filtering packets without a guard IP.")
@@ -103,6 +128,18 @@ class CrawlJob(object):
         self.site = 0
         self.visit = 0
         self.batch = 0
+        self.captchas = [False] * (self.batches * len(self.urls) * self.visits)
+
+    def add_captcha(self):
+        try:
+            captcha_filepath = ut.capture_dirpath_to_captcha(self.path)
+            rename(self.path, captcha_filepath)
+
+            self.captchas[self.instance] = True
+        except OSError as e:
+            wl_log.exception('%s could not be renamed to %s',
+                             self.path, captcha_filepath)
+            raise e
 
     @property
     def pcap_file(self):
@@ -123,10 +160,11 @@ class CrawlJob(object):
     @property
     def path(self):
         attributes = [self.batch, self.site, self.instance]
+        if self.captchas[self.instance]:
+            wl_log.debug('Instance %i is a captcha', self.instance)
+            attributes.insert(0, 'captcha')
         return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
     def __repr__(self):
         return "Batches: %s, Sites: %s, Visits: %s" \
                % (self.batches, len(self.urls), self.visits)
-
-
