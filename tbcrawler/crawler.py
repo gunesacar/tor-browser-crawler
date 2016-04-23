@@ -135,7 +135,7 @@ class CrawlJob(object):
             captcha_filepath = ut.capture_dirpath_to_captcha(self.path)
             rename(self.path, captcha_filepath)
 
-            self.captchas[self.instance] = True
+            self.captchas[self.global_visit] = True
         except OSError as e:
             wl_log.exception('%s could not be renamed to %s',
                              self.path, captcha_filepath)
@@ -154,14 +154,18 @@ class CrawlJob(object):
         return self.batch * self.visits + self.visit
 
     @property
+    def global_visit(self):
+        global_visit_no = self.site * self.visits + self.instance
+        return global_visit_no
+
+    @property
     def url(self):
         return self.urls[self.site]
 
     @property
     def path(self):
         attributes = [self.batch, self.site, self.instance]
-        if self.captchas[self.instance]:
-            wl_log.debug('Instance %i is a captcha', self.instance)
+        if self.captchas[self.global_visit]:
             attributes.insert(0, 'captcha')
         return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
