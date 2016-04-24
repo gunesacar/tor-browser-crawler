@@ -13,9 +13,10 @@ DUMPCAP_START_TIMEOUT = 10.0
 class Sniffer(object):
     """Capture network traffic using dumpcap."""
 
-    def __init__(self, path="/dev/null", filter=""):
+    def __init__(self, device, path="/dev/null", filter=""):
         self.pcap_file = path
         self.pcap_filter = filter
+        self.device = device
         self.p0 = None
         self.is_recording = False
 
@@ -34,16 +35,16 @@ class Sniffer(object):
         """Return capture filter."""
         return self.pcap_filter
 
-    def start_capture(self, pcap_path=None, pcap_filter=""):
+    def start_capture(self, device='', pcap_path=None, pcap_filter=""):
         """Start capture. Configure sniffer if arguments are given."""
         if pcap_filter:
             self.set_capture_filter(pcap_filter)
         if pcap_path:
             self.set_pcap_path(pcap_path)
         prefix = ""
-        command = '{}dumpcap -P -a duration:{} -a filesize:{} -i eth0 -s 0 -f \'{}\' -w {}'\
+        command = '{}dumpcap -P -a duration:{} -a filesize:{} -i {} -s 0 -f \'{}\' -w {}'\
             .format(prefix, cm.SOFT_VISIT_TIMEOUT, cm.MAX_DUMP_SIZE,
-                    self.pcap_filter, self.pcap_file)
+                    self.device, self.pcap_filter, self.pcap_file)
         wl_log.info(command)
         self.p0 = subprocess.Popen(command, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, shell=True)
@@ -72,12 +73,16 @@ class Sniffer(object):
         ut.kill_all_children(self.p0.pid)  # self.p0.pid is the shell pid
         self.p0.kill()
         self.is_recording = False
+        captcha_filepath = ut.capture_filepath_to_captcha(self.pcap_file)
         if os.path.isfile(self.pcap_file):
             wl_log.info('Dumpcap killed. Capture size: %s Bytes %s' %
                         (os.path.getsize(self.pcap_file), self.pcap_file))
+        elif os.path.isfile(captcha_filepath):
+            wl_log.info('Dumpcap killed, file renamed to captcha_*. Capture size: %s Bytes %s' %
+                        (os.path.getsize(captcha_filepath), captcha_filepath))
         else:
-            wl_log.warning('Dumpcap killed but cannot find capture file: %s'
-                           % self.pcap_file)
+            wl_log.warning('Dumpcap killed but cannot find capture file: %s or %s'
+                           % (self.pcap_file, captcha_filepath))
 
     def __enter__(self):
         self.start_capture()
@@ -89,4 +94,3 @@ class Sniffer(object):
 
 class DumpcapTimeoutError(Exception):
     pass
-

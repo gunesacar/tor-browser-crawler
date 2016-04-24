@@ -1,6 +1,10 @@
+*~
 *.pyc
 tags
 tbb/
 src/
 results/
 .idea/
+.cache
+tbselenium
+tor-browser_*-*

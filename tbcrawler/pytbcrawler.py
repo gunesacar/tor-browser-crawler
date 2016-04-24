@@ -52,7 +52,9 @@ def run():
 
     # Instantiate crawler
     crawl_type = getattr(crawler_mod, "Crawler" + args.type)
-    crawler = crawl_type(driver, controller, args.screenshots)
+    crawler = crawl_type(driver, controller,
+                         device=args.device,
+                         screenshots=args.screenshots)
 
     # Configure crawl
     job_config = ut.get_dict_subconfig(config, args.config, "job")
@@ -69,6 +71,8 @@ def run():
         wl_log.warning("Keyboard interrupt! Quitting...")
         sys.exit(-1)
     finally:
+        driver.quit()
+        controller.quit()
         # Post crawl
         post_crawl()
 
@@ -154,6 +158,9 @@ def parse_arguments():
     parser.add_argument('-s', '--screenshots', action='store_true',
                         help='Capture page screenshots',
                         default=False)
+    parser.add_argument('-d', '--device', action='store_true',
+                        help='Interface to sniff the network traffic',
+                        default="eth0")
 
     # Limit crawl
     parser.add_argument('--start', type=int,

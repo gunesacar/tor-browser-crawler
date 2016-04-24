@@ -1,11 +1,14 @@
 import signal
 from contextlib import contextmanager
+from shutil import copyfile
 from distutils.dir_util import copy_tree
 from os import makedirs
-from os.path import exists
+from os.path import exists, join, split
+
 
 import psutil
 from pyvirtualdisplay import Display
+from scapy.all import PcapReader, wrpcap
 
 from common import TimeoutException
 from tbcrawler import common as cm
@@ -57,6 +60,38 @@ def timeout(seconds):
         yield
     finally:
         signal.alarm(0)
+
+
+def filter_pcap(pcap_path, iplist, strip=False, clean=True):
+    orig_pcap = pcap_path + ".original"
+    copyfile(pcap_path, orig_pcap)
+    with PcapReader(orig_pcap) as preader:
+        pcap_filtered = []
+        for p in preader:
+            if 'TCP' in p:
+                ip = p.payload
+                if strip:
+                    p['TCP'].remove_payload()  # stip payload (encrypted)
+                if ip.dst in iplist or ip.src in iplist:
+                    pcap_filtered.append(p)
+    wrpcap(pcap_path, pcap_filtered)
+
+
+def has_captcha(page_source):
+    keywords = ['recaptcha_submit',
+                'manual_recaptcha_challenge_field']
+    return any(keyword in page_source for keyword in keywords)
+
+
+def capture_dirpath_to_captcha(capture_dir_filepath):
+    root_dir, capture_dir = split(capture_dir_filepath)
+    return join(root_dir, 'captcha_' + capture_dir)
+
+
+def capture_filepath_to_captcha(capture_filepath):
+    dirname, filename = split(capture_filepath)
+    crawl_dir, capture_dir = split(dirname)
+    return join(crawl_dir, 'captcha_' + capture_dir, filename)
 
 
 def start_xvfb(win_width=cm.DEFAULT_XVFB_WIN_W,
