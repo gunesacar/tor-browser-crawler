@@ -1,5 +1,5 @@
 from os import rename
-from os.path import join, split
+from os.path import join
 from pprint import pformat
 from time import sleep
 
@@ -27,7 +27,8 @@ class CrawlerBase(object):
         wl_log.info(pformat(self.job))
         for self.job.batch in xrange(self.job.batches):
             wl_log.info("**** Starting batch %s ***" % self.job.batch)
-            self.__do_batch()
+            with self.controller.launch():
+                self.__do_batch()
             sleep(float(self.job.config['pause_between_batches']))
 
     def post_visit(self):
@@ -39,48 +40,44 @@ class CrawlerBase(object):
         If the controller is configured to not pollute the profile, each
         restart forces to switch the entry guard.
         """
-        with self.controller.launch():
-            for self.job.site in xrange(len(self.job.urls)):
-                if len(self.job.url) > cm.MAX_FNAME_LENGTH:
-                    wl_log.warning("URL is too long: %s" % self.job.url)
-                    continue
+        for self.job.site in xrange(len(self.job.urls)):
+            if len(self.job.url) > cm.MAX_FNAME_LENGTH:
+                wl_log.warning("URL is too long: %s" % self.job.url)
+                continue
 
-                self.__do_instance()
-                sleep(float(self.job.config['pause_between_sites']))
+            self.__do_visits()
+            sleep(float(self.job.config['pause_between_sites']))
 
-    def __do_instance(self):
+    def __do_visits(self):
         for self.job.visit in xrange(self.job.visits):
-            ut.create_dir(self.job.path)
-            wl_log.info("*** Visit #%s to %s ***",
-                        self.job.visit, self.job.url)
-            with self.driver.launch():
-                self.set_page_load_timeout()
-
-                self.__do_visit()
-
-                self.get_screenshot_if_enabled()
-                self.post_visit()
-
-    def __do_visit(self):
-        with Sniffer(device=self.device,
-                     path=self.job.pcap_file, filter=cm.DEFAULT_FILTER):
-            sleep(1)  # make sure dumpcap is running
+            wl_log.info("*** Visit #%s to %s ***", self.job.visit, self.job.url)
             try:
-                with ut.timeout(cm.HARD_VISIT_TIMEOUT):
-                    self.driver.get(self.job.url)
+                ut.create_dir(self.job.path)
+                with self.driver.launch():
+                    self.set_page_load_timeout()
 
-                    page_source = self.driver.page_source.strip().lower()
-                    if ut.has_captcha(page_source):
-                        wl_log.warning('captcha found')
-                        self.job.add_captcha()
+                    self.__do_instance()
 
-                    sleep(float(self.job.config['pause_in_site']))
+                    self.get_screenshot_if_enabled()
+                    self.post_visit()
             except (cm.HardTimeoutException, TimeoutException):
                 wl_log.error("Visit to %s has timed out!", self.job.url)
             except ValueError as e:
                 raise e
             except Exception as exc:
                 wl_log.error("Unknown exception: %s", exc)
+
+    def __do_instance(self):
+        with Sniffer(device=self.device,
+                     path=self.job.pcap_file, filter=cm.DEFAULT_FILTER):
+            sleep(1)  # make sure dumpcap is running
+            with ut.timeout(cm.HARD_VISIT_TIMEOUT):
+                self.driver.get(self.job.url)
+                page_source = self.driver.page_source.strip().lower()
+                if ut.has_captcha(page_source):
+                    wl_log.warning('captcha found')
+                    self.job.add_captcha()
+                sleep(float(self.job.config['pause_in_site']))
 
     def set_page_load_timeout(self):
         try:
@@ -114,9 +111,9 @@ class CrawlerWebFP(CrawlerBase):
 
 
 class CrawlerMiddle(CrawlerWebFP):
-    def post_visit(self):
-        sleep(float(self.job.config['pause_between_visits']))
-        self.filter_packets_without_guard_ip()
+    def __do_batch(self):
+        # TODO: add stem logic to attach stream to circuits with our middle
+        super(CrawlerWebFP, self).__init__()
 
 
 class CrawlerMultitab(CrawlerWebFP):
