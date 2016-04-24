@@ -13,7 +13,7 @@ DUMPCAP_START_TIMEOUT = 10.0
 class Sniffer(object):
     """Capture network traffic using dumpcap."""
 
-    def __init__(self, device, path="/dev/null", filter=""):
+    def __init__(self, device='eth0', path="/dev/null", filter=""):
         self.pcap_file = path
         self.pcap_filter = filter
         self.device = device
@@ -41,6 +41,8 @@ class Sniffer(object):
             self.set_capture_filter(pcap_filter)
         if pcap_path:
             self.set_pcap_path(pcap_path)
+        if device:
+            self.device = device
         prefix = ""
         command = '{}dumpcap -P -a duration:{} -a filesize:{} -i {} -s 0 -f \'{}\' -w {}'\
             .format(prefix, cm.SOFT_VISIT_TIMEOUT, cm.MAX_DUMP_SIZE,

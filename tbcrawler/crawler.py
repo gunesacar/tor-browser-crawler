@@ -113,6 +113,12 @@ class CrawlerWebFP(CrawlerBase):
             wl_log.error("Check pcap: %s", self.job.pcap_file)
 
 
+class CrawlerMiddle(CrawlerWebFP):
+    def post_visit(self):
+        sleep(float(self.job.config['pause_between_visits']))
+        self.filter_packets_without_guard_ip()
+
+
 class CrawlerMultitab(CrawlerWebFP):
     pass
 
