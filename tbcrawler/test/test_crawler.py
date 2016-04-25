@@ -1,9 +1,10 @@
+import pytest
 import os
 import shutil
 import ConfigParser
 import unittest
 from glob import glob
-from os.path import isfile, isdir
+from os.path import isdir, join
 
 from tbcrawler import common as cm, utils as ut
 import netifaces
@@ -11,16 +12,21 @@ from tbcrawler.torcontroller import TorController
 from tbcrawler.pytbcrawler import TorBrowserWrapper, setup_virtual_display, build_crawl_dirs
 from tbselenium.common import USE_RUNNING_TOR
 from tbcrawler import crawler as crawler_mod
-from tbcrawler.crawler import CrawlerBase
 
 TEST_URL_LIST = ['https://www.google.de',
                  'https://torproject.org',
                  'https://firstlook.org/theintercept/']
+TEST_DIRS = join(cm.TEST_DIR, "dirs")
 
 
 class CrawlerTest(unittest.TestCase):
     def setUp(self):
-        cm.CONFIG_FILE = os.path.join(cm.TEST_DIR, 'config.ini')
+        # clean dirs
+        if isdir(TEST_DIRS):
+            shutil.rmtree(TEST_DIRS)
+        os.mkdir(TEST_DIRS)
+
+        cm.CONFIG_FILE = os.path.join(cm.TEST_FILES_DIR, 'config.ini')
         self.config = ConfigParser.RawConfigParser()
         self.config.read(cm.CONFIG_FILE)
 
@@ -60,15 +66,17 @@ class CrawlerTest(unittest.TestCase):
         virtual_display = ''
         self.xvfb_display = setup_virtual_display(virtual_display)
 
+    @pytest.mark.skipif(bool(os.getenv('CI', False)), reason='Skip in CI')
     def test_crawl(self):
         self.configure_crawler('Base', 'captcha_test')
         job = crawler_mod.CrawlJob(self.job_config, TEST_URL_LIST)
-        cm.CRAWL_DIR = os.path.join(cm.TEST_DIR, 'test_crawl')
+        cm.CRAWL_DIR = os.path.join(TEST_DIRS, 'test_crawl')
         self.run_crawl(job)
         # TODO: test for more conditions...
         self.assertGreater(len(os.listdir(cm.CRAWL_DIR)), 0)
         shutil.rmtree(cm.CRAWL_DIR)
 
+    @pytest.mark.skipif(bool(os.getenv('CI', False)), reason='Skip in CI')
     def test_cloudflare_captcha_page(self):
         expected_pcaps = 2
 
@@ -76,7 +84,7 @@ class CrawlerTest(unittest.TestCase):
 
         url = 'https://cloudflare.com/'
         job = crawler_mod.CrawlJob(self.job_config, [url])
-        cm.CRAWL_DIR = os.path.join(cm.TEST_DIR,
+        cm.CRAWL_DIR = os.path.join(TEST_DIRS,
                                     'test_cloudflare_captcha_results')
         build_crawl_dirs()
         os.chdir(cm.CRAWL_DIR)
@@ -90,6 +98,7 @@ class CrawlerTest(unittest.TestCase):
         self.assertEqual(expected_pcaps, len(capture_dirs))
         shutil.rmtree(cm.CRAWL_DIR)
 
+    @pytest.mark.skipif(bool(os.getenv('CI', False)), reason='Skip in CI')
     def test_not_captcha_after_captcha(self):
         self.configure_crawler('WebFP', 'captcha_test')
 
@@ -97,7 +106,7 @@ class CrawlerTest(unittest.TestCase):
         known_not_captcha_url = 'https://check.torproject.org/'
         urls = [known_captcha_url, known_not_captcha_url]
         job = crawler_mod.CrawlJob(self.job_config, urls)
-        cm.CRAWL_DIR = os.path.join(cm.TEST_DIR,
+        cm.CRAWL_DIR = os.path.join(TEST_DIRS,
                                     'test_not_captcha_after_captcha')
         self.run_crawl(job)
 
@@ -111,6 +120,7 @@ class CrawlerTest(unittest.TestCase):
 
         shutil.rmtree(cm.CRAWL_DIR)
 
+    @pytest.mark.skipif(bool(os.getenv('CI', False)), reason='Skip in CI')
     def test_captcha_not_captcha_2_batches(self):
         self.configure_crawler('WebFP', 'test_captcha_not_captcha_2_batches')
 
@@ -118,7 +128,7 @@ class CrawlerTest(unittest.TestCase):
         known_not_captcha_url = 'https://check.torproject.org/'
         urls = [known_captcha_url, known_not_captcha_url]
         job = crawler_mod.CrawlJob(self.job_config, urls)
-        cm.CRAWL_DIR = os.path.join(cm.TEST_DIR,
+        cm.CRAWL_DIR = os.path.join(TEST_DIRS,
                                     'test_not_captcha_after_captcha')
         self.run_crawl(job)
 
@@ -140,5 +150,7 @@ class CrawlerTest(unittest.TestCase):
         finally:
             self.driver.quit()
             self.controller.quit()
+
+
 if __name__ == "__main__":
     unittest.main()
