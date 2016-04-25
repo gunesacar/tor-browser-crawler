@@ -3,6 +3,7 @@ from os.path import join
 from pprint import pformat
 from time import sleep
 import stem
+import random
 
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
@@ -112,27 +113,23 @@ class CrawlerWebFP(CrawlerBase):
 
 
 class CrawlerMiddle(CrawlerWebFP):
-
-	_MIDDLE_FINGERPRINT = 'ACC874AD6D4D3AC308CB6C044620A159A1123196'  # kulcosic-tor
-
     def __do_batch(self):
-		self.controller.set_conf('__LeaveStreamsUnattached', '1')  # leave stream management to us
-		def attach_stream(stream):
-			# at this point stem should have some circuits created alreay
-			# TODO: have a fallback if not...
-			circuits = self.controller.get_circuits(default=[])
-			# TODO: do we want to check the purpose and status of the circuit?
-			circ_sample = random.sample([c for c in circuits if len(c.path) == 3], 1)
-			if stream.status == 'NEW':
-				new_path = circ_sample.path
-				new_path[1] = self._MIDDLE_FINGERPRINT
-				circuit_id = self.controller.new_circuit(new_path, await_build = True)
-				self.controller.attach_stream(stream.id, circuit_id)
+        self.controller.set_conf('__LeaveStreamsUnattached', '1')  # leave stream management to us
+        def attach_stream(stream):
+            # at this point stem should have some circuits created alreay
+            # TODO: have a fallback if not...
+            circuits = self.controller.get_circuits(default=[])
+            # TODO: do we want to check the purpose and status of the circuit?
+            circ_sample = random.sample([c for c in circuits if len(c.path) == 3], 1)
+            if stream.status == 'NEW':
+                new_path = circ_sample.path
+                new_path[1] = self._MIDDLE_FINGERPRINT
+                circuit_id = self.controller.new_circuit(new_path, await_build = True)
+                self.controller.attach_stream(stream.id, circuit_id)
 
-		self.controller.add_event_listener(attach_stream, stem.control.EventType.STREAM)
+        self.controller.add_event_listener(attach_stream, stem.control.EventType.STREAM)
 
         super(CrawlerWebFP, self).__init__()
-
 
 class CrawlerMultitab(CrawlerWebFP):
     pass
