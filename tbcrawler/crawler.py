@@ -31,7 +31,7 @@ class CrawlerBase(object):
             wl_log.info("**** Starting batch %s ***" % self.job.batch)
             with self.controller.launch():
                 self.__do_batch()
-            sleep(float(self.job.config['pause_between_batches']))
+                sleep(float(self.job.config['pause_between_batches']))
 
     def post_visit(self):
         pass
@@ -79,7 +79,7 @@ class CrawlerBase(object):
                 if ut.has_captcha(page_source):
                     wl_log.warning('captcha found')
                     self.job.add_captcha()
-                sleep(float(self.job.config['pause_in_site']))
+                    sleep(float(self.job.config['pause_in_site']))
 
     def set_page_load_timeout(self):
         try:
@@ -113,23 +113,37 @@ class CrawlerWebFP(CrawlerBase):
 
 
 class CrawlerMiddle(CrawlerWebFP):
+
+    def get_circuit_path():
+        circ_id = self.controller.new_circuit(await_build=False)
+        circ = self.controller.get_circuit(circ_id)
+        path = circ.path
+        self.controller.close_circuit(circ_id)
+        return path
+
     def __do_batch(self):
-        self.controller.set_conf('__LeaveStreamsUnattached', '1')  # leave stream management to us
+
         def attach_stream(stream):
-            # at this point stem should have some circuits created alreay
-            # TODO: have a fallback if not...
-            circuits = self.controller.get_circuits(default=[])
-            # TODO: do we want to check the purpose and status of the circuit?
-            circ_sample = random.sample([c for c in circuits if len(c.path) == 3], 1)
             if stream.status == 'NEW':
-                new_path = circ_sample.path
+                new_path = self.get_circuit_path()
                 new_path[1] = self._MIDDLE_FINGERPRINT
-                circuit_id = self.controller.new_circuit(new_path, await_build = True)
-                self.controller.attach_stream(stream.id, circuit_id)
+                circ_id = self.controller.new_circuit(new_path, await_build=True)
+                # TODO: do we want to check the purpose and status of the circuit?
+                # await_build=True makes sure it's ready
+                try:
+                    wl_log.debug("Attach stream %s to circuit %s", stream.id, circ_id)
+                    self.controller.attach_stream(stream.id, circuit_id)
+                except stem.UnsatisfiableRequest as e:
+                    wl_log.error("Attaching stream to custom circuit: %s", e)
+                except stem.InvalidRequest as e1:
+                    wl_log.error("Attaching stream to custom circuit: %s", e1)
 
-        self.controller.add_event_listener(attach_stream, stem.control.EventType.STREAM)
+        self.controller.controller.add_event_listener(attach_stream,
+                                                      stem.control.EventType.STREAM)
+        self.controller.controller.set_conf('__LeaveStreamsUnattached', '1')
 
-        super(CrawlerWebFP, self).__init__()
+        super(CrawlerWebFP, self).__do_batch()
+
 
 class CrawlerMultitab(CrawlerWebFP):
     pass
@@ -185,8 +199,8 @@ class CrawlJob(object):
         attributes = [self.batch, self.site, self.instance]
         if self.captchas[self.global_visit]:
             attributes.insert(0, 'captcha')
-        return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
+            return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
     def __repr__(self):
         return "Batches: %s, Sites: %s, Visits: %s" \
-               % (self.batches, len(self.urls), self.visits)
+            % (self.batches, len(self.urls), self.visits)
