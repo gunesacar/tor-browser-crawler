@@ -151,6 +151,16 @@ class CrawlerTest(unittest.TestCase):
             self.driver.quit()
             self.controller.quit()
 
+    #@pytest.mark.skipif(bool(os.getenv('CI', False)), reason='Skip in CI')
+    def test_middle(self):
+        self.configure_crawler('Middle', 'captcha_test')
+        job = crawler_mod.CrawlJob(self.job_config, TEST_URL_LIST)
+        cm.CRAWL_DIR = os.path.join(TEST_DIRS, 'test_crawl')
+        self.run_crawl(job)
+        # TODO: test for more conditions...
+        self.assertGreater(len(os.listdir(cm.CRAWL_DIR)), 0)
+        shutil.rmtree(cm.CRAWL_DIR)
+
 
 if __name__ == "__main__":
     unittest.main()
