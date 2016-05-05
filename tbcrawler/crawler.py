@@ -31,7 +31,7 @@ class CrawlerBase(object):
             wl_log.info("**** Starting batch %s ***" % self.job.batch)
             with self.controller.launch():
                 self.__do_batch()
-                sleep(float(self.job.config['pause_between_batches']))
+            sleep(float(self.job.config['pause_between_batches']))
 
     def post_visit(self):
         pass
@@ -79,7 +79,7 @@ class CrawlerBase(object):
                 if ut.has_captcha(page_source):
                     wl_log.warning('captcha found')
                     self.job.add_captcha()
-                    sleep(float(self.job.config['pause_in_site']))
+                sleep(float(self.job.config['pause_in_site']))
 
     def set_page_load_timeout(self):
         try:
@@ -199,7 +199,7 @@ class CrawlJob(object):
         attributes = [self.batch, self.site, self.instance]
         if self.captchas[self.global_visit]:
             attributes.insert(0, 'captcha')
-            return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
+        return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
     def __repr__(self):
         return "Batches: %s, Sites: %s, Visits: %s" \
