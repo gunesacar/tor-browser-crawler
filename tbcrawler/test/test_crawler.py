@@ -112,7 +112,7 @@ class CrawlerTest(unittest.TestCase):
 
         for _dir in os.listdir(cm.CRAWL_DIR):
             marked_captcha = _dir.startswith('captcha_')
-            is_torproject_dir = '_1_' in _dir
+            is_torproject_dir = 'check.torproject.org' in _dir
             if is_torproject_dir:
                 self.assertTrue(not marked_captcha)
             else:
@@ -134,12 +134,24 @@ class CrawlerTest(unittest.TestCase):
 
         for _dir in os.listdir(cm.CRAWL_DIR):
             marked_captcha = _dir.startswith('captcha_')
-            is_torproject_dir = _dir.split('_')[-2] is '1'
+            is_torproject_dir = 'check.torproject.org' in _dir
             if is_torproject_dir:
                 self.assertTrue(not marked_captcha)
             else:
                 self.assertTrue(marked_captcha)
+        shutil.rmtree(cm.CRAWL_DIR)
 
+    def test_website_in_capture_dir(self):
+        self.configure_crawler('WebFP', 'captcha_test')
+
+        url = 'https://cloudflare.com/'
+        job = crawler_mod.CrawlJob(self.job_config, [url])
+        cm.CRAWL_DIR = os.path.join(cm.TEST_DIR,
+                                    'test_website_in_capture_dir')
+        self.run_crawl(job)
+
+        for _dir in os.listdir(cm.CRAWL_DIR):
+            self.assertTrue('cloudflare.com' in _dir)
         shutil.rmtree(cm.CRAWL_DIR)
 
     def run_crawl(self, job):

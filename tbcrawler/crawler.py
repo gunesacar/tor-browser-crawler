@@ -1,6 +1,7 @@
 from os import rename
 from os.path import join
 from pprint import pformat
+from urlparse import urlsplit
 from time import sleep
 import stem
 import random
@@ -196,9 +197,11 @@ class CrawlJob(object):
 
     @property
     def path(self):
-        attributes = [self.batch, self.site, self.instance]
+        website = urlsplit(self.url).hostname
+        attributes = [self.batch, website, self.instance]
         if self.captchas[self.global_visit]:
             attributes.insert(0, 'captcha')
+
         return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
     def __repr__(self):
