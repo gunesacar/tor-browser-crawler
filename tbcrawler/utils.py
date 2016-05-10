@@ -48,6 +48,21 @@ def get_dict_subconfig(config, section, prefix):
             for option in config.options(section) if option.startswith(prefix)}
 
 
+def set_dict_value_types(d):
+    typed_d = []
+    for k, v in d.items():
+        typed_v = v
+        for t in [int, float, bool]:
+            try:
+                typed_v = t(v)
+            except ValueError:
+                pass
+            else:
+                break
+        typed_d.append((k, typed_v))
+    return dict(typed_d)
+
+
 @contextmanager
 def timeout(seconds):
     """From: http://stackoverflow.com/a/601168/1336939"""
