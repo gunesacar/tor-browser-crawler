@@ -43,6 +43,7 @@ def run():
 
     # Configure browser
     ffprefs = ut.get_dict_subconfig(config, args.config, "ffpref")
+    ffprefs = ut.set_dict_value_types(ffprefs)
     driver = TorBrowserWrapper(cm.TBB_DIR,
                                tbb_logfile_path=cm.DEFAULT_FF_LOG,
                                tor_cfg=USE_RUNNING_TOR,
