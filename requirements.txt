@@ -4,4 +4,4 @@ netifaces>=0.10.4
 pyvirtualdisplay
 scapy
 selenium>=2.45.0
--e git+https://github.com/webfp/tor-browser-selenium.git#egg=tbselenium-1.0
+-e git+https://github.com/mjuarezm/tor-browser-selenium.git@addons#egg=tbselenium-1.0
