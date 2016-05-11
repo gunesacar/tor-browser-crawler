@@ -48,6 +48,7 @@ def run():
                                tbb_logfile_path=cm.DEFAULT_FF_LOG,
                                tor_cfg=USE_RUNNING_TOR,
                                pref_dict=ffprefs,
+                               addons_dir=cm.DEFAULT_ADDONS_DIR,
                                socks_port=int(torrc_config['socksport']),
                                canvas_allowed_hosts=host_list)
 

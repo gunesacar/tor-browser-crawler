@@ -53,6 +53,7 @@ TEST_FILES_DIR = join(TEST_DIR, 'files')
 TBB_DIR = join(BASE_DIR, 'tor-browser_en-US')
 # Top URLs localized (DE) to prevent the effect of localization
 LOCALIZED_DATASET = join(ETC_DIR, "localized-urls-100-top.csv")
+DEFAULT_ADDONS_DIR = join(BASE_DIR, "addons")
 
 VBOX_GATEWAY_IP = "10.0.2.2"  # default gateway IP of VirtualBox
 LXC_GATEWAY_IP = "10.0.3.1"  # default gateway IP of LXC
