@@ -16,7 +16,7 @@ sudo pip install -r requirements.txt
 # download gist
 wget https://gist.github.com/mjuarezm/852eca0c5820eb7998432e39effcf73a/archive/a638f62d16f10ddc402d05e6772ba7ea5c8d760c.zip
 unzip a638f62d16f10ddc402d05e6772ba7ea5c8d760c.zip
-# TODO...
+# TODO: run setup.py in root of repo
 
 # pass defense
 git clone https://mjuarezm@bitbucket.org/jhayes14/multitab-wf.git -b wf-client-defense ./addons/wf-client-defense
@@ -25,4 +25,4 @@ jpm xpi
 cd ../..
 
 # run
-python bin/tbcrawler.py -u etc/hs_urls.list
+python bin/tbcrawler.py -u etc/hs_urls.list -c webfp_server -t WebFP -d eth0 -s
