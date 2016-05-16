@@ -142,6 +142,10 @@ def parse_arguments():
     parser.add_argument('-o', '--output',
                         help='Directory to dump the results (default=./results).',
                         default=cm.CRAWL_DIR)
+    parser.add_argument('-a', '--add-ons',
+                        help='Directory with the add-ons to be installed '
+			'(default=%s)' % cm.DEFAULT_ADDONS_DIR,
+                        default=cm.DEFAULT_ADDONS_DIR)
     parser.add_argument('-c', '--config',
                         help="Crawler tor driver and controller configurations.",
                         choices=config.sections(),

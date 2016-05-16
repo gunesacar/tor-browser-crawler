@@ -24,5 +24,10 @@ cd ./addons/wf-client-defense
 jpm xpi
 cd ../..
 
+# TODO: how do we check if sawp is already there?
+sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+sudo /sbin/mkswap /var/swap.1
+sudo /sbin/swapon /var/swap.1
+
 # run
 python bin/tbcrawler.py -u etc/hs_urls.list -c webfp_server -t WebFP -d eth0 -s
