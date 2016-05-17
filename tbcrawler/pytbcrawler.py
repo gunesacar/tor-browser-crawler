@@ -48,7 +48,7 @@ def run():
                                tbb_logfile_path=cm.DEFAULT_FF_LOG,
                                tor_cfg=USE_RUNNING_TOR,
                                pref_dict=ffprefs,
-                               addons_dir=cm.DEFAULT_ADDONS_DIR,
+                               addons_dir=args.addons_dir,
                                socks_port=int(torrc_config['socksport']),
                                canvas_allowed_hosts=host_list)
 
@@ -72,9 +72,11 @@ def run():
     except KeyboardInterrupt:
         wl_log.warning("Keyboard interrupt! Quitting...")
         sys.exit(-1)
+    except Exception as e:
+	wl_log.error("ERROR: unknown exception while crawling: %s" % e)
     finally:
-        driver.quit()
-        controller.quit()
+        #driver.quit()
+        #controller.quit()
         # Post crawl
         post_crawl()
 
@@ -82,6 +84,7 @@ def run():
         ut.stop_xvfb(xvfb_display)
 
     # die
+    wl_log.info("[tbcrawler] the crawl has finished.")
     sys.exit(0)
 
 def setup_virtual_display(virt_display):
@@ -142,10 +145,9 @@ def parse_arguments():
     parser.add_argument('-o', '--output',
                         help='Directory to dump the results (default=./results).',
                         default=cm.CRAWL_DIR)
-    parser.add_argument('-a', '--add-ons',
-                        help='Directory with the add-ons to be installed '
-			'(default=%s)' % cm.DEFAULT_ADDONS_DIR,
-                        default=cm.DEFAULT_ADDONS_DIR)
+    parser.add_argument('-a', '--addons_dir',
+                        help='Directory with the add-ons to be installed (default=None).',
+                        default=None)
     parser.add_argument('-c', '--config',
                         help="Crawler tor driver and controller configurations.",
                         choices=config.sections(),
