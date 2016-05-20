@@ -54,17 +54,16 @@ class CrawlerBase(object):
     def __do_visits(self):
         for self.job.visit in xrange(self.job.visits):
             wl_log.info("*** Visit #%s to %s ***", self.job.visit, self.job.url)
-            try:
-                ut.create_dir(self.job.path)
+	    try:
+	        ut.create_dir(self.job.path)
                 with self.driver.launch():
                     self.set_page_load_timeout()
-
-                    self.__do_instance()
-
-                    self.get_screenshot_if_enabled()
+                    try:
+                        self.__do_instance()
+                        self.get_screenshot_if_enabled()
+                    except (cm.HardTimeoutException, TimeoutException):
+                        wl_log.error("Visit to %s has timed out!", self.job.url)
                     self.post_visit()
-            except (cm.HardTimeoutException, TimeoutException):
-                wl_log.error("Visit to %s has timed out!", self.job.url)
             except ValueError as e:
                 raise e
             except Exception as exc:

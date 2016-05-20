@@ -5,7 +5,7 @@ import traceback
 from contextlib import contextmanager
 from logging import INFO, DEBUG
 from os import stat, chdir
-from os.path import isfile, join
+from os.path import isfile, join, abspath
 from shutil import copyfile
 from sys import maxsize, argv
 from urlparse import urlparse
@@ -48,7 +48,7 @@ def run():
                                tbb_logfile_path=cm.DEFAULT_FF_LOG,
                                tor_cfg=USE_RUNNING_TOR,
                                pref_dict=ffprefs,
-                               addons_dir=args.addons_dir,
+                               addons_dir=abspath(args.addons_dir),
                                socks_port=int(torrc_config['socksport']),
                                canvas_allowed_hosts=host_list)
 
