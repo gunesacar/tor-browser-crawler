@@ -29,7 +29,14 @@ def run():
     build_crawl_dirs()
 
     # Read URLs
-    url_list = read_list_urls(args.url_file, args.start, args.stop)
+    if isfile(args.urls):
+	    url_list = read_list_urls(args.urls, args.start, args.stop)
+    else:
+        try:
+            url_list = args.urls.split(',')
+        except Exception as e:
+            wl_log.error("ERROR: expects a string with comma-separated list "
+                         "of URLs of a path to file")
     host_list = [urlparse(url).hostname for url in url_list]
 
     # Configure logger
@@ -44,11 +51,13 @@ def run():
     # Configure browser
     ffprefs = ut.get_dict_subconfig(config, args.config, "ffpref")
     ffprefs = ut.set_dict_value_types(ffprefs)
+    print(ffprefs)
+    addons_path = abspath(args.addons_dir) if args.addons_dir else None
     driver = TorBrowserWrapper(cm.TBB_DIR,
                                tbb_logfile_path=cm.DEFAULT_FF_LOG,
                                tor_cfg=USE_RUNNING_TOR,
                                pref_dict=ffprefs,
-                               addons_dir=abspath(args.addons_dir),
+                               addons_dir=addons_path,
                                socks_port=int(torrc_config['socksport']),
                                canvas_allowed_hosts=host_list)
 
@@ -135,8 +144,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Crawl a list of URLs in multiple batches.')
 
     # List of urls to be crawled
-    parser.add_argument('-u', '--url-file', required=True,
-                        help='Path to the file that contains the list of URLs to crawl.',
+    parser.add_argument('-u', '--urls', required=True,
+                        help='Path to the file that contains the list of URLs to crawl,'
+                             ' or a comma-separated list of URLs.',
                         default=cm.LOCALIZED_DATASET)
     parser.add_argument('-t', '--type',
                         choices=cm.CRAWLER_TYPES,

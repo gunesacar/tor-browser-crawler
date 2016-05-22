@@ -69,7 +69,6 @@ class TorController(object):
     def quit(self):
         """Kill Tor process."""
         if self.tor_process:
-            print("Killing tor process")
             self.tor_process.kill()
         if self.tmp_tor_data_dir and isdir(self.tmp_tor_data_dir):
             print("Removing tmp tor data dir")

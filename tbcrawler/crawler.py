@@ -1,8 +1,10 @@
-from os import rename
-from os.path import join
+from os import rename, remove
+from tempfile import gettempdir
+from os.path import join, isfile
 from pprint import pformat
 from urlparse import urlsplit
 from time import sleep
+from shutil import move
 import stem
 import random
 
@@ -37,6 +39,9 @@ class CrawlerBase(object):
     def post_visit(self):
         pass
 
+    def cleanup_visit(self):
+        pass
+
     def __do_batch(self):
         """
         Must init/restart the Tor process to have a different circuit.
@@ -63,7 +68,10 @@ class CrawlerBase(object):
                         self.get_screenshot_if_enabled()
                     except (cm.HardTimeoutException, TimeoutException):
                         wl_log.error("Visit to %s has timed out!", self.job.url)
-                    self.post_visit()
+		    else:
+		        self.post_visit()
+                    finally:
+                        self.cleanup_visit()
             except ValueError as e:
                 raise e
             except Exception as exc:
@@ -75,7 +83,9 @@ class CrawlerBase(object):
             sleep(1)  # make sure dumpcap is running
             with ut.timeout(cm.HARD_VISIT_TIMEOUT):
                 self.driver.get(self.job.url)
-                page_source = self.driver.page_source.strip().lower()
+                page_source = self.driver.page_source.encode('utf-8').strip().lower()
+                with open(join(self.job.path, "source.html"), "w") as fhtml:
+                    fhtml.write(page_source)
                 if ut.has_captcha(page_source):
                     wl_log.warning('captcha found')
                     self.job.add_captcha()
@@ -97,9 +107,20 @@ class CrawlerBase(object):
 
 
 class CrawlerWebFP(CrawlerBase):
+
+    def cleanup_visit(self):
+        addon_logfile = join(gettempdir(), 'wf_defense_addon.log')
+        if isfile(addon_logfile):
+            remove(addon_logfile)
+
     def post_visit(self):
         sleep(float(self.job.config['pause_between_visits']))
         self.filter_packets_without_guard_ip()
+        # move addon log to file
+        addon_logfile = join(gettempdir(), 'wf_defense_addon.log')
+        if isfile(addon_logfile):
+	    move(addon_logfile, join(self.job.path, 'wf_defense_addon.log'))
+        
 
     def filter_packets_without_guard_ip(self):
         guard_ips = set([ip for ip in self.controller.get_all_guard_ips()])
