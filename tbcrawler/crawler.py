@@ -115,10 +115,16 @@ class CrawlerBase(object):
 
     def get_screenshot_if_enabled(self):
         if self.screenshots:
+            # selenium's bug: https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/3596
+            # set a timeout for getting a screenshot in case we hit the bug.
             try:
-                self.driver.get_screenshot_as_file(self.job.png_file)
-            except WebDriverException:
-                wl_log.error("Cannot get screenshot.")
+                with ut.timeout(5):
+                    try:
+                        self.driver.get_screenshot_as_file(self.job.png_file)
+                    except WebDriverException:
+                        wl_log.error("Cannot get screenshot.")
+            except cm.HardTimeoutException:
+                wl_log.error("Function to take the screenshot has timed out!")
 
 
 class CrawlerWebFP(CrawlerBase):
