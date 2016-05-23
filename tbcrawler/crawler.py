@@ -66,7 +66,7 @@ class CrawlerBase(object):
             wl_log.info("*** Visit #%s to %s ***", self.job.visit, self.job.url)
 	    try:
 	        ut.create_dir(self.job.path)
-                self.save_checkpoint()
+	        self.save_checkpoint()
                 with self.driver.launch():
                     self.set_page_load_timeout()
                     try:
@@ -115,10 +115,11 @@ class CrawlerBase(object):
 
     def get_screenshot_if_enabled(self):
         if self.screenshots:
-            try:
-                self.driver.get_screenshot_as_file(self.job.png_file)
-            except WebDriverException:
-                wl_log.error("Cannot get screenshot.")
+            with ut.timeout(5):
+                try:
+                    self.driver.get_screenshot_as_file(self.job.png_file)
+                except WebDriverException:
+                    wl_log.error("Cannot get screenshot.")
 
 
 class CrawlerWebFP(CrawlerBase):
