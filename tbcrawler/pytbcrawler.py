@@ -2,6 +2,7 @@ import argparse
 import ConfigParser
 import sys
 import traceback
+import pickle
 from contextlib import contextmanager
 from logging import INFO, DEBUG
 from os import stat, chdir
@@ -68,8 +69,13 @@ def run():
                          screenshots=args.screenshots)
 
     # Configure crawl
-    job_config = ut.get_dict_subconfig(config, args.config, "job")
-    job = crawler_mod.CrawlJob(job_config, url_list)
+    if args.recover_file is not None and isfile(args.recover_file):
+        with open(args.recover_file) as fchkpt:
+            job = pickle.load(fchkpt)
+            wl_log.info("Job recovered: %s" % str(job))
+    else:
+        job_config = ut.get_dict_subconfig(config, args.config, "job")
+        job = crawler_mod.CrawlJob(job_config, url_list)
 
     # Run display
     xvfb_display = setup_virtual_display(args.virtual_display)
@@ -168,6 +174,9 @@ def parse_arguments():
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='increase output verbosity',
                         default=False)
+    parser.add_argument('-r', '--recover-file',
+                        help="File with checkpoint to recover from.",
+                        default=None)
 
     # Crawler features
     parser.add_argument('-x', '--virtual-display',

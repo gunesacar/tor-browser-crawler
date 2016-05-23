@@ -5,6 +5,7 @@ from pprint import pformat
 from urlparse import urlsplit
 from time import sleep
 from shutil import move
+import pickle
 import stem
 import random
 
@@ -30,11 +31,12 @@ class CrawlerBase(object):
         self.job = job
         wl_log.info("Starting new crawl")
         wl_log.info(pformat(self.job))
-        for self.job.batch in xrange(self.job.batches):
+        while self.job.batch < self.job.batches:
             wl_log.info("**** Starting batch %s ***" % self.job.batch)
             with self.controller.launch():
                 self.__do_batch()
             sleep(float(self.job.config['pause_between_batches']))
+            self.job.batch += 1
 
     def post_visit(self):
         pass
@@ -48,19 +50,23 @@ class CrawlerBase(object):
         If the controller is configured to not pollute the profile, each
         restart forces to switch the entry guard.
         """
-        for self.job.site in xrange(len(self.job.urls)):
+        while self.job.site < len(self.job.urls):
             if len(self.job.url) > cm.MAX_FNAME_LENGTH:
                 wl_log.warning("URL is too long: %s" % self.job.url)
                 continue
 
             self.__do_visits()
             sleep(float(self.job.config['pause_between_sites']))
+            self.job.site += 1
+        if self.job.site == len(self.job.urls):
+            self.job.site = 0
 
     def __do_visits(self):
-        for self.job.visit in xrange(self.job.visits):
+        while self.job.visit < self.job.visits:
             wl_log.info("*** Visit #%s to %s ***", self.job.visit, self.job.url)
 	    try:
 	        ut.create_dir(self.job.path)
+	        self.save_checkpoint()
                 with self.driver.launch():
                     self.set_page_load_timeout()
                     try:
@@ -72,10 +78,11 @@ class CrawlerBase(object):
 		        self.post_visit()
                     finally:
                         self.cleanup_visit()
-            except ValueError as e:
-                raise e
             except Exception as exc:
                 wl_log.error("Unknown exception: %s", exc)
+            self.job.visit += 1
+        if self.job.visit == self.job.visits:
+            self.job.visit = 0
 
     def __do_instance(self):
         with Sniffer(device=self.device,
@@ -90,6 +97,14 @@ class CrawlerBase(object):
                     wl_log.warning('captcha found')
                     self.job.add_captcha()
                 sleep(float(self.job.config['pause_in_site']))
+
+    def save_checkpoint(self):
+        fname = join(cm.CRAWL_DIR, "job.chkpt")
+        if isfile(fname):
+            remove(fname)
+        with open(fname, "w") as f:
+            pickle.dump(self.job, f)
+        wl_log.info("New checkpoint at %s" % fname)
 
     def set_page_load_timeout(self):
         try:
@@ -225,5 +240,7 @@ class CrawlJob(object):
         return join(cm.CRAWL_DIR, "_".join(map(str, attributes)))
 
     def __repr__(self):
-        return "Batches: %s, Sites: %s, Visits: %s" \
-            % (self.batches, len(self.urls), self.visits)
+        return "Batches: %s/%s, Sites: %s/%s, Visits: %s/%s" \
+            % (self.batch + 1, self.batches,
+               self.site + 1, len(self.urls),
+               self.visit + 1, self.visits)
