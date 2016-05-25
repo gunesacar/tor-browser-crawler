@@ -7,6 +7,9 @@ sudo apt-get install python tcpdump wireshark Xvfb firefox python-dev python-set
 sudo apt-get install nodejs nodejs-legacy npm
 sudo npm install jpm --global
 
+# permissions: capture capabilities
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
+
 # set offloads
 sudo ifconfig eth0 mtu 1500
 sudo ethtool -K eth0 tx off rx off tso off gso off gro off lro off

@@ -13,7 +13,7 @@ from selenium.common.exceptions import TimeoutException, WebDriverException
 
 import common as cm
 import utils as ut
-from dumputils import Sniffer
+from dumputils import Sniffer, DumpcapTimeoutError
 from log import wl_log
 
 
@@ -72,14 +72,14 @@ class CrawlerBase(object):
                     try:
                         self.__do_instance()
                         self.get_screenshot_if_enabled()
-                    except (cm.HardTimeoutException, TimeoutException):
+                    except (cm.HardTimeoutException, TimeoutException, DumpcapTimeoutError):
                         wl_log.error("Visit to %s has timed out!", self.job.url)
 		    else:
 		        self.post_visit()
                     finally:
                         self.cleanup_visit()
             except Exception as exc:
-                wl_log.error("Unknown exception: %s", exc)
+                wl_log.error("Unknown exception: %s" % repr(exc))
             self.job.visit += 1
         if self.job.visit == self.job.visits:
             self.job.visit = 0
