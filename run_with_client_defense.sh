@@ -5,6 +5,7 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get install python tcpdump wireshark Xvfb firefox python-dev python-setuptools libpcap-dev
 sudo apt-get install nodejs nodejs-legacy npm
+sudo npm install jpm --global
 
 # set offloads
 sudo ifconfig eth0 mtu 1500
@@ -27,9 +28,9 @@ jpm xpi
 cd ../..
 
 # TODO: how do we check if sawp is already there?
-sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
-sudo /sbin/mkswap /var/swap.1
-sudo /sbin/swapon /var/swap.1
+# sudo /bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=1024
+# sudo /sbin/mkswap /var/swap.1
+# sudo /sbin/swapon /var/swap.1
 
 # run
 python bin/tbcrawler.py -u etc/hs_urls.list -c webfp_server -t WebFP -d eth0 -s
