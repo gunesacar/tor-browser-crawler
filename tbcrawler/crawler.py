@@ -130,7 +130,7 @@ class CrawlerBase(object):
 class CrawlerWebFP(CrawlerBase):
 
     def cleanup_visit(self):
-        addon_logfile = join(gettempdir(), 'wf_defense_addon.log')
+        addon_logfile = join(gettempdir(), 'tbb-http.log')
         if isfile(addon_logfile):
             remove(addon_logfile)
 
@@ -138,10 +138,10 @@ class CrawlerWebFP(CrawlerBase):
         sleep(float(self.job.config['pause_between_visits']))
         self.filter_packets_without_guard_ip()
         # move addon log to file
-        addon_logfile = join(gettempdir(), 'wf_defense_addon.log')
+        addon_logfile = join(gettempdir(), 'tbb-http.log')
         if isfile(addon_logfile):
-	    move(addon_logfile, join(self.job.path, 'wf_defense_addon.log'))
-        
+	    move(addon_logfile, join(self.job.path, 'tbb-http.log'))
+
 
     def filter_packets_without_guard_ip(self):
         guard_ips = set([ip for ip in self.controller.get_all_guard_ips()])
