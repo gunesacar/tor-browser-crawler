@@ -37,7 +37,20 @@ def run():
 
     # Configure controller
     torrc_config = ut.get_dict_subconfig(config, args.config, "torrc")
-    controller = TorController(tbb_path=args.tbb_path,
+    if args.tor_binary_path and args.tor_data_path:
+        tbb_path = None
+        tor_binary_path = args.tor_binary_path
+        tor_data_path = args.tor_data_path
+        wl_log.info("Using custom Tor in %s" % tor_binary_path)
+    else:
+        tbb_path = args.tbb_path
+        tor_binary_path = None
+        tor_data_path = None
+        wl_log.info("Using Tor Browser Bundle in %s" % tbb_path)
+
+    controller = TorController(tbb_path=tbb_path,
+                               tor_binary_path=tor_binary_path,
+                               tor_data_path=tor_data_path,
                                torrc_dict=torrc_config,
                                pollute=False)
 
@@ -141,6 +154,10 @@ def parse_arguments():
     parser.add_argument('-b', '--tbb-path',
                         help="Path to the Tor Browser Bundle directory.",
                         default=cm.TBB_DIR)
+    parser.add_argument('-r', '--tor-binary-path',
+                        help="Path to the Tor binary.")
+    parser.add_argument('-d', '--tor-data-path',
+                        help="Path to the Tor data directory.")
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='increase output verbosity',
                         default=False)
