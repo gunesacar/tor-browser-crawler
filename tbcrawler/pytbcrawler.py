@@ -37,7 +37,7 @@ def run():
 
     # Configure controller
     torrc_config = ut.get_dict_subconfig(config, args.config, "torrc")
-    controller = TorController(cm.TBB_DIR,
+    controller = TorController(tbb_path=args.tbb_path,
                                torrc_dict=torrc_config,
                                pollute=False)
 
