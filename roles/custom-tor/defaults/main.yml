@@ -2,7 +2,7 @@
 tor_apt_packages:
   - libssl-dev
   - openssl
-  - zlib
+  - zlib1g-dev
   - libevent-dev
   - autoconf
   - automake

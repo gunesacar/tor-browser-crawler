@@ -59,4 +59,8 @@ Compiling Tor from source
 * To compile Tor from source, put the Tor source top directory in ./
 (either copying or symlinking it).
 
+* The compilation in the remote machine will happen if there is a "~/tor" directory in there.
+If you want to disable it, remove that directory both from the local repository dir
+and the remote machine.
+
 * It will be installed in /usr/local/bin.

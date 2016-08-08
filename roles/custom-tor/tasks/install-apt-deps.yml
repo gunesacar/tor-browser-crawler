@@ -1,5 +1,5 @@
 ---
-- name: Install python2.7, tcpdump, wireshark, and xvfb.
+- name: Install libssl-dev, openssl, zlib1g-dev, libevent-dev, autoconf, automake, make
   become: yes
   apt:
     name: "{{ item }}"
@@ -7,4 +7,4 @@
     # Since this role is separate from common, it makes sense to update the pkg
     # cache before installing these pkgs
     update_cache: yes
-  with_items: "{{ tb_crawler_apt_packages }}"
+  with_items: "{{ tor_apt_packages }}"
