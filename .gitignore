@@ -14,3 +14,4 @@ playbook.retry
 /tor-browser_en-US/
 /*.json
 *~
+/tor

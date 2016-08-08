@@ -30,8 +30,11 @@ General configuration
 * You'll still have disable offloads manually:
 `sudo ethtool -K <interface> tx off rx off tso off gso off gro off lro off`
 
+Provider specific configurations
+===================================
+
 Docker configuration
-=====================
+----------------------
 
 * Be sure to add your user to the docker group according to [the instructions on
 the Docker website](https://docs.docker.com/engine/installation/linux/) and
@@ -40,12 +43,20 @@ then log in and back out, so you don't have to run your containers as root.
 * Create and provision the container: `vagrant up --provider docker`
 
 VirtualBox configuration
-==========================
+--------------------------
 * `vagrant up --provider virtualbox` will create and provision the machines.
 
 Digital Ocean configuration
-=============================
+------------------------------
 * Define machine configurations in ./digital-ocean-machines.json
   following the template given in ./skel/.
 
 * `vagrant up --provider digital_ocean` will create and provision the machines.
+
+Compiling Tor from source
+============================
+
+* To compile Tor from source, put the Tor source top directory in ./
+(either copying or symlinking it).
+
+* It will be installed in /usr/local/bin.

@@ -3,3 +3,4 @@
   roles: 
     - role: common
     - role: tb-crawler
+    - role: custom-tor

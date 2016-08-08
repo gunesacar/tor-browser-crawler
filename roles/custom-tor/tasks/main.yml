@@ -1,0 +1,4 @@
+---
+- include: install-apt-deps.yml
+- include: make-tor-from-source.yml
+- include: install-custom-tor.yml

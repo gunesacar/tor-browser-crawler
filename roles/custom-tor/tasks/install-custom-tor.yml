@@ -1,0 +1,4 @@
+---
+- name: Make install custom Tor
+  command: make install chdir="~{{ tbb_username }}/tor"
+  become: yes    

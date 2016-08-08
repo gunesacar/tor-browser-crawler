@@ -1,0 +1,11 @@
+---
+tor_apt_packages:
+  - libssl-dev
+  - openssl
+  - zlib
+  - libevent-dev
+  - autoconf
+  - automake
+  - make
+
+tbb_username: "{{ ansible_ssh_user }}"

@@ -28,6 +28,7 @@ Vagrant.configure(2) do |config|
   end
 
   config.vm.synced_folder "./", "/home/vagrant/tor-browser-crawler/", disabled: false
+  config.vm.synced_folder "./tor", "/home/vagrant/tor/", disabled: false
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = "playbook.yml"
   end

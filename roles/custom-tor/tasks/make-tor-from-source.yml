@@ -1,0 +1,10 @@
+---
+- name: Autogen custom Tor.
+  command: ./autogen.sh chdir="~{{ tbb_username }}/tor"
+
+- name: Configure custom Tor.
+  command: ./configure --disable-asciidoc chdir="~{{ tbb_username }}/tor"
+
+- name: Make custom Tor
+  command: make chdir="~{{ tbb_username }}/tor"
+    
