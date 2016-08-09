@@ -1,0 +1,10 @@
+---
+
+- name: Install apt dependencies if ~/tor exists
+  include: install-apt-deps.yml
+
+- name: Compile Tor if ~/tor/autogen.sh exists
+  include: make-tor-from-source.yml
+
+- name: Install Tor if the compilation succeeded
+  include: install-custom-tor.yml

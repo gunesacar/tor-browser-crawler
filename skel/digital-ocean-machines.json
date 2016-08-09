@@ -1,0 +1,12 @@
+{
+    "token": "",
+    "ssh_username": "",
+    "ssh_private_key_path": "",
+    "droplets": {
+        "droplet-001": {
+	    "image": "debian-8-x64",
+	    "region": "fra1",
+	    "ram_size": "1gb"
+        }
+    }
+}

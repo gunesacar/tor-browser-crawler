@@ -2,6 +2,6 @@
 - include: disable-background-networking.yml
 - include: upgrade-packages.yml
 - include: common-packages.yml
-- include: start-tor-daemon.yml
+# - include: start-tor-daemon.yml
 - include: source-virtualenvwrapper.yml
 - include: download-verify-tbb.yml

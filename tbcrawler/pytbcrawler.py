@@ -5,7 +5,7 @@ import traceback
 from contextlib import contextmanager
 from logging import INFO, DEBUG
 from os import stat, chdir
-from os.path import isfile, join
+from os.path import isfile, join, basename
 from shutil import copyfile
 from sys import maxsize, argv
 from urlparse import urlparse
@@ -37,7 +37,9 @@ def run():
 
     # Configure controller
     torrc_config = ut.get_dict_subconfig(config, args.config, "torrc")
-    controller = TorController(cm.TBB_DIR,
+    controller = TorController(tbb_path=args.tbb_path,
+                               tor_binary_path=args.tor_binary_path,
+                               tor_data_path=args.tor_data_path,
                                torrc_dict=torrc_config,
                                pollute=False)
 
@@ -99,7 +101,7 @@ def build_crawl_dirs():
     ut.create_dir(cm.CRAWL_DIR)
     ut.create_dir(cm.LOGS_DIR)
     copyfile(cm.CONFIG_FILE, join(cm.LOGS_DIR, 'config.ini'))
-    add_symlink(join(cm.RESULTS_DIR, 'latest_crawl'), cm.CRAWL_DIR)
+    add_symlink(join(cm.RESULTS_DIR, 'latest_crawl'), basename(cm.CRAWL_DIR))
 
 
 def parse_url_list(file_path, start, stop):
@@ -141,6 +143,10 @@ def parse_arguments():
     parser.add_argument('-b', '--tbb-path',
                         help="Path to the Tor Browser Bundle directory.",
                         default=cm.TBB_DIR)
+    parser.add_argument('-r', '--tor-binary-path',
+                        help="Path to the Tor binary.")
+    parser.add_argument('-a', '--tor-data-path',
+                        help="Path to the Tor data directory.")
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='increase output verbosity',
                         default=False)

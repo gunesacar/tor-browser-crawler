@@ -20,7 +20,8 @@ class TorController(object):
                  torrc_dict={'controlport': '9051', 'socksport': '9050'},
                  pollute=True):
         assert (tbb_path or tor_binary_path and tor_data_path)
-        if tbb_path:
+
+        if tbb_path and not (tor_binary_path and tor_data_path):
             tbb_path = tbb_path.rstrip('/')
             tor_binary_path = join(tbb_path, DEFAULT_TOR_BINARY_PATH)
             tor_data_path = join(tbb_path, DEFAULT_TOR_DATA_PATH)

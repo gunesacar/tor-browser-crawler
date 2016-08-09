@@ -4,11 +4,12 @@ common_apt_packages:
   - tmux
   - tree
   - vim
+  - gcc
+  - libdbus-glib-1-2 # tor browser bundle
   - git #tbselenium depends
   - python-dev # psutil depends
   - libpcap-dev # pcapy depends
   - gnupg-curl
-  - tor # potentially separate out 
 tbb_arch: 64
 tbb_release: 6.0.3
 tbb_locale: en-US
