@@ -145,7 +145,7 @@ def parse_arguments():
                         default=cm.TBB_DIR)
     parser.add_argument('-r', '--tor-binary-path',
                         help="Path to the Tor binary.")
-    parser.add_argument('-d', '--tor-data-path',
+    parser.add_argument('-a', '--tor-data-path',
                         help="Path to the Tor data directory.")
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='increase output verbosity',
