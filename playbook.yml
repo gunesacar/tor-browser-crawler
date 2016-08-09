@@ -4,6 +4,6 @@
     - stat: path=./tor
       register: tor_dir
   roles:
-    # - role: common
-    # - role: tb-crawler
+    - role: common
+    - role: tb-crawler
     - { role: custom-tor, when: tor_dir.stat.exists }
