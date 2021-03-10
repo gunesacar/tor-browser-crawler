@@ -36,13 +36,13 @@ Requirements
 ### 2. Run a crawl with the defaults
 
 ```
-python main.py -t WebFP -u ./etc/localized-urls-100-top.csv -c wang_and_goldberg
+python tbcrawler/pytbcrawler.py -t WebFP -u ./etc/localized-urls-100-top.csv -c wang_and_goldberg
 ```
 
 To get all the available command line parameters and the usage run:
 
 ```
-python main.py --help
+python tbcrawler/pytbcrawler.py --help
 ```
 
 ### 3. Check out the results
